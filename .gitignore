@@ -1,5 +1,25 @@
-*.class
+bsp
+.scala-build
+.bloop
+.idea
+.metals
+.vscode
+*.jar
+*.semanticdb
+*.iml
+target/
+.DS_Store
 *.log
+*.tmp
+*.schema.json
+**/Pulumi.*.yaml
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
+coverage/
+scoverage-reports/
+
+# generated sources, run `scala-cli run ./scripts -M proto -- all`
+src/main/scala/besom/rpc 
+
+.out/
+
+*.asc
