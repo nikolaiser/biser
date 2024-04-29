@@ -1,4 +1,4 @@
-package io.github.nikolaiser.biser.proxmox
+package com.nikolaiser.biser.proxmox
 
 case class CoreVmParams(
     hostname: String,

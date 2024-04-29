@@ -6,7 +6,7 @@ val BesomCommandVersion = "0.10.0-core.0.3"
 
 inThisBuild(
   List(
-    organization := "io.github.nikolaiser",
+    organization := "com.nikolaiser",
     homepage := Some(url("https://github.com/nikolaiser/biser")),
     // Alternatively License.Apache2 see https://github.com/sbt/librarymanagement/blob/develop/core/src/main/scala/sbt/librarymanagement/License.scala
     licenses := List(
@@ -25,6 +25,8 @@ inThisBuild(
 
 ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org"
 sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
+
+ThisBuild / versionScheme := Some("early-semver")
 
 lazy val root = project
   .in(file("."))

@@ -1,4 +1,4 @@
-package io.github.nikolaiser.biser.proxmox
+package com.nikolaiser.biser.proxmox
 
 import besom.*
 import besom.api.proxmoxve

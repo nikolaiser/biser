@@ -1,4 +1,4 @@
-package io.github.nikolaiser.biser.nix
+package com.nikolaiser.biser.nix
 
 import besom.*
 import besom.api.command
