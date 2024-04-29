@@ -1,4 +1,5 @@
-package nikolaiser.biser.nix
+package io.github.nikolaiser.biser.nix
+
 import besom.*
 import besom.api.command
 import besom.internal.RegistersOutputs

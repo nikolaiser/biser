@@ -1,9 +1,9 @@
-package nikolaiser.biser.proxmox
+package io.github.nikolaiser.biser.proxmox
 
 import besom.*
 import besom.api.proxmoxve
 import besom.internal.RegistersOutputs
-import nikolaiser.biser.nix.FlakeBuild
+import io.github.nikolaiser.biser.nix.FlakeBuild
 
 case class NixOsCloudInit(
     file: Output[proxmoxve.storage.File]

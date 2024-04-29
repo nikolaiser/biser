@@ -30,7 +30,6 @@ lazy val root = project
   .in(file("."))
   .settings(
     name := "biser",
-    organization := "nikolaiser",
     scalaVersion := scala3Version,
     libraryDependencies ++= Seq(
       "org.virtuslab" %% "besom-core" % BesomVersion,
