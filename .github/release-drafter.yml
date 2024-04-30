@@ -1,15 +1,12 @@
-name-template: 'v$RESOLVED_VERSION 🌈'
+name-template: 'v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
 categories:
   - title: '🚀 Features'
     labels:
-      - 'feature'
       - 'enhancement'
   - title: '🐛 Bug Fixes'
     labels:
       - 'fix'
-      - 'bugfix'
-      - 'bug'
   - title: '🧰 Maintenance'
     label: 'chore'
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
@@ -27,18 +24,15 @@ version-resolver:
   default: patch
 autolabeler:
   - label: 'chore'
-    files:
-      - '*.md'
-    branch:
-      - '/docs{0,1}\/.+/'
-  - label: 'bug'
-    branch:
-      - '/fix-.+/'
+    title:
+      - '/chore/i'
+      - '/docs/i'
+  - label: 'fix'
     title:
       - '/fix/i'
   - label: 'enhancement'
-    branch:
-      - '/feat\/.+/'
+    title:
+      - '/feat/i'
 template: |
   ## Changes
 
