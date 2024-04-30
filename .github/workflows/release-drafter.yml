@@ -18,5 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: release-drafter/release-drafter@v6
+        with:
+          commitish: main # https://github.com/release-drafter/release-drafter/issues/1125#issuecomment-1471142225
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

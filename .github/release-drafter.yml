@@ -24,15 +24,15 @@ version-resolver:
   default: patch
 autolabeler:
   - label: 'chore'
-    title:
-      - '/chore/i'
-      - '/docs/i'
+    branch:
+      - '/chore-.+/'
+      - '/docs-.+/'
   - label: 'fix'
-    title:
-      - '/fix/i'
+    branch:
+      - '/fix-.+/'
   - label: 'enhancement'
-    title:
-      - '/feat/i'
+    branch:
+      - '/feat-.+/'
 template: |
   ## Changes
 
