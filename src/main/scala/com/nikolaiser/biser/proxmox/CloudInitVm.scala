@@ -55,17 +55,15 @@ object CloudInitVm:
             dedicated = params.memoryGb * 1024
           ),
           initialization = proxmoxve.vm.inputs.VirtualMachineInitializationArgs(
-            userAccount =
-              proxmoxve.vm.inputs.VirtualMachineInitializationUserAccountArgs(
-                username = params.username,
-                keys = params.authorizedKeys
-              ),
+            userAccount = proxmoxve.vm.inputs.VirtualMachineInitializationUserAccountArgs(
+              username = params.username,
+              keys = params.authorizedKeys
+            ),
             ipConfigs = List(
               proxmoxve.vm.inputs.VirtualMachineInitializationIpConfigArgs(
                 ipv4 = proxmoxve.vm.inputs
                   .VirtualMachineInitializationIpConfigIpv4Args(
-                    address =
-                      params.ipv4Config.map(_.address).getOrElse("dhcp"),
+                    address = params.ipv4Config.map(_.address).getOrElse("dhcp"),
                     gateway = params.ipv4Config.map(_.gateway)
                   )
               )

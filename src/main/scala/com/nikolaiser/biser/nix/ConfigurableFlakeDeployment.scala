@@ -34,29 +34,28 @@ object ConfigurableFlakeDeployment:
       val deployment = for {
 
         flakeDir <- command.local
-          .Command(
-            s"biser-flake-deployment-$name-flakedir",
-            command.local.CommandArgs(
-              create =
-                s"mkdir -p '$$XDG_STATE_HOME/biser/flakes/$name' && echo '$$XDG_STATE_HOME/biser/flakes/$name'",
-              delete = s"rm -rf '$$XDG_STATE_HOME/biser/flakes/$name'"
-            )
-          )
-          .stdout
+                      .Command(
+                        s"biser-flake-deployment-$name-flakedir",
+                        command.local.CommandArgs(
+                          create = s"mkdir -p '$$XDG_STATE_HOME/biser/flakes/$name' && echo '$$XDG_STATE_HOME/biser/flakes/$name'",
+                          delete = s"rm -rf '$$XDG_STATE_HOME/biser/flakes/$name'"
+                        )
+                      )
+                      .stdout
 
         _ <- command.local
-          .Command(
-            s"biser-flake-deployment-$flakeRepository-build",
-            command.local.CommandArgs(
-              create =
-                s"""git clone --depth=1 $flakeRepository . && echo '$jsonConfig' > '$configLocation' && nixos-rebuild switch < /dev/null --use-remote-sudo --target-host $targetHost --show-trace --flake ".#$flakeOutput"""",
-              dir = flakeDir,
-              environment = Map(
-                "NIX_SSHOPTS" -> "-t -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-              )
-            )
-          )
-          .stdout
+               .Command(
+                 s"biser-flake-deployment-$flakeRepository-build",
+                 command.local.CommandArgs(
+                   create =
+                     s"""git clone --depth=1 $flakeRepository . && echo '$jsonConfig' > '$configLocation' && nixos-rebuild switch < /dev/null --use-remote-sudo --target-host $targetHost --show-trace --flake ".#$flakeOutput"""",
+                   dir = flakeDir,
+                   environment = Map(
+                     "NIX_SSHOPTS" -> "-t -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+                   )
+                 )
+               )
+               .stdout
 
       } yield flakeDir
 
