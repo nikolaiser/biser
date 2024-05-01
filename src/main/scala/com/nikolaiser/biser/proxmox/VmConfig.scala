@@ -1,6 +1,6 @@
 package com.nikolaiser.biser.proxmox
 
-case class CoreVmParams(
+case class VmConfig(
     hostname: String,
     nodeName: String,
     cores: Int,

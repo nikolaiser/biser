@@ -5,7 +5,7 @@ import besom.api.proxmoxve
 import besom.internal.RegistersOutputs
 import com.nikolaiser.biser.nix.FlakeBuild
 
-case class NixOsCloudInit(
+case class NixOsCloudInit private (
     file: Output[proxmoxve.storage.File]
 )(using ComponentBase)
     extends ComponentResource
@@ -13,28 +13,37 @@ case class NixOsCloudInit(
 
 object NixOsCloudInit:
 
+  case class Params(
+      flake: Input[String],
+      nodeName: Input[String]
+  )
+
   def apply(using Context)(
-      nodeName: String,
-      flake: String,
+      name: NonEmptyString,
+      params: Params,
       options: ComponentResourceOptions = ComponentResourceOptions()
   ): Output[NixOsCloudInit] =
     component(
-      s"""biser-nixos-cloud-init-$nodeName""",
+      name,
       "biser:proxmox:NixOsCloudInit",
       options
     ) {
-      val imageBuild = FlakeBuild(flake)
+      val imageBuild = FlakeBuild(
+        s"$name-image-build",
+        FlakeBuild.Params(params.flake)
+      )
 
       val cloudInitImageFile = proxmoxve.storage.File(
-        s"biser-nixos-cloud-init-$nodeName",
+        s"$name-image-upload",
         proxmoxve.storage.FileArgs(
           contentType = "snippets",
           datastoreId = "local",
-          nodeName = nodeName,
+          nodeName = params.nodeName,
           sourceFile = proxmoxve.storage.inputs.FileSourceFileArgs(
-            path = imageBuild.flatMap(_.path).map(base => s"$base/nixos.img")
+            path = p"${imageBuild.flatMap(_.path)}/nixos.img"
           )
         )
       )
+
       NixOsCloudInit(cloudInitImageFile)
     }
