@@ -24,8 +24,7 @@ object FlakeBuild:
       val flakeBuildCommand = command.local.Command(
         s"biser-nix-build-$flake",
         command.local.CommandArgs(
-          create =
-            s"""nix build $flake --no-link --json 2> /dev/null | jq '.[0].outputs.out' --raw-output"""
+          create = s"""nix build $flake --no-link --json 2> /dev/null | jq '.[0].outputs.out' --raw-output"""
         )
       )
 
