@@ -4,7 +4,7 @@ import besom.*
 import besom.api.proxmoxve
 import besom.internal.RegistersOutputs
 
-case class CloudInitVm(
+case class CloudInitVm private (
     vm: Output[proxmoxve.vm.VirtualMachine]
 )(using ComponentBase)
     extends ComponentResource
@@ -12,59 +12,64 @@ case class CloudInitVm(
 
 object CloudInitVm:
 
+  case class Params(
+      image: Input[proxmoxve.storage.File],
+      config: Input[VmConfig]
+  )
+
   def apply(using Context)(
-      image: proxmoxve.storage.File,
-      params: CoreVmParams,
+      name: NonEmptyString,
+      params: Params,
       options: ComponentResourceOptions = ComponentResourceOptions()
   ): Output[CloudInitVm] =
     component(
-      s"""biser-cloud-init-vm-${params.hostname}""",
+      name,
       "biser:proxmox:CloudInitVm",
       options
     ) {
       val metaConfigFile = proxmoxve.storage.File(
-        s"biser-meta-config-${params.hostname}",
+        s"$name-meta-config",
         proxmoxve.storage.FileArgs(
           contentType = "snippets",
           datastoreId = "local",
-          nodeName = params.nodeName,
+          nodeName = params.config.asOutput().map(_.nodeName),
           sourceRaw = proxmoxve.storage.inputs.FileSourceRawArgs(
-            data = s"""
+            data = p"""
             |dsmode: local
-            |local-hostname: ${params.hostname}
+            |local-hostname: ${params.config.asOutput().map(_.hostname)}
             """.stripMargin,
-            fileName = s"meta-config-${params.hostname}.yaml"
+            fileName = p"meta-config-${params.config.asOutput().map(_.hostname)}.yaml"
           )
         )
       )
 
       val vm = proxmoxve.vm.VirtualMachine(
-        s"biser-vm-${params.hostname}",
+        s"$name-vm",
         proxmoxve.vm.VirtualMachineArgs(
-          name = params.hostname,
-          nodeName = params.nodeName,
-          tags = params.tags,
+          name = params.config.asOutput().map(_.hostname),
+          nodeName = params.config.asOutput().map(_.nodeName),
+          tags = params.config.asOutput().map(_.tags),
           agent = proxmoxve.vm.inputs.VirtualMachineAgentArgs(
-            enabled = params.qemuAgentEnabled
+            enabled = params.config.asOutput().map(_.qemuAgentEnabled)
           ),
           cpu = proxmoxve.vm.inputs.VirtualMachineCpuArgs(
-            cores = params.cores,
+            cores = params.config.asOutput().map(_.cores),
             `type` = "host"
           ),
           memory = proxmoxve.vm.inputs.VirtualMachineMemoryArgs(
-            dedicated = params.memoryGb * 1024
+            dedicated = params.config.asOutput().map(_.memoryGb * 1024)
           ),
           initialization = proxmoxve.vm.inputs.VirtualMachineInitializationArgs(
             userAccount = proxmoxve.vm.inputs.VirtualMachineInitializationUserAccountArgs(
-              username = params.username,
-              keys = params.authorizedKeys
+              username = params.config.asOutput().map(_.username),
+              keys = params.config.asOutput().map(_.authorizedKeys)
             ),
             ipConfigs = List(
               proxmoxve.vm.inputs.VirtualMachineInitializationIpConfigArgs(
                 ipv4 = proxmoxve.vm.inputs
                   .VirtualMachineInitializationIpConfigIpv4Args(
-                    address = params.ipv4Config.map(_.address).getOrElse("dhcp"),
-                    gateway = params.ipv4Config.map(_.gateway)
+                    address = params.config.asOutput().map(_.ipv4Config.map(_.address).getOrElse("dhcp")),
+                    gateway = params.config.asOutput().map(_.ipv4Config.map(_.gateway))
                   )
               )
             ),
@@ -73,9 +78,9 @@ object CloudInitVm:
           disks = List(
             proxmoxve.vm.inputs.VirtualMachineDiskArgs(
               datastoreId = "local-lvm",
-              fileId = image.id,
+              fileId = params.image.asOutput().id,
               interface = "virtio0",
-              size = params.diskGb
+              size = params.config.asOutput().map(_.diskGb)
             )
           )
         )

@@ -4,7 +4,7 @@ import besom.*
 import besom.api.command
 import besom.internal.RegistersOutputs
 
-case class FlakeBuild(
+case class FlakeBuild private (
     path: Output[String]
 )(using ComponentBase)
     extends ComponentResource
@@ -12,19 +12,24 @@ case class FlakeBuild(
 
 object FlakeBuild:
 
+  case class Params(
+      flake: Input[String]
+  )
+
   def apply(using Context)(
-      flake: String,
+      name: NonEmptyString,
+      params: Params,
       options: ComponentResourceOptions = ComponentResourceOptions()
   ): Output[FlakeBuild] =
     component(
-      s"""biser-nix-build-$flake""",
+      name,
       "biser:nix:FlakeBuild",
       options
     ) {
       val flakeBuildCommand = command.local.Command(
-        s"biser-nix-build-$flake",
+        s"$name-build-command",
         command.local.CommandArgs(
-          create = s"""nix build $flake --no-link --json 2> /dev/null | jq '.[0].outputs.out' --raw-output"""
+          create = p"""nix build ${params.flake} --no-link --json 2> /dev/null | jq '.[0].outputs.out' --raw-output"""
         )
       )
 
