@@ -7,53 +7,43 @@ import besom.json.JsonWriter
 import scala.concurrent.Future
 import Pulumi.given_ExecutionContext
 
-case class ConfigurableFlakeDeployment private (
-    flakeDir: Output[String]
+case class PurgaDeployment private (
+    config: Output[String]
 )(using ComponentBase)
     extends ComponentResource
     derives RegistersOutputs
 
-object ConfigurableFlakeDeployment:
+object PurgaDeployment:
 
   case class Params[A](
-      flakeRepository: Input[String],
-      flakeOutput: Input[String],
+      flake: Input[String],
+      flakeInput: Input[String] = "purgaArgs",
       config: Input[A],
-      targetHost: Input[String], // including usrname@
-      configLocation: Input[String] = "./config.json"
+      targetHost: Input[String] // including usrname@
   )
 
   def apply[A: JsonWriter](using Context)(
       name: NonEmptyString,
       params: Params[A],
       options: ComponentResourceOptions = ComponentResourceOptions()
-  ): Output[ConfigurableFlakeDeployment] =
+  ): Output[PurgaDeployment] =
     component(
       name,
-      "biser:nix:ConfigurableFlakeDeployment",
+      "biser:nix:PurgaDeployment",
       options
     ) {
-      val jsonConfig = params.config.asOutput().map(conf => summon[JsonWriter[A]].write(conf).toString)
+      val jsonConfig = params.config.asOutput().map { conf => summon[JsonWriter[A]].write(conf).toString }
 
       val deployment = for {
 
-        flakeDir <- command.local
-                      .Command(
-                        s"$name-flake-directory",
-                        command.local.CommandArgs(
-                          create = s"mkdir -p '$$XDG_STATE_HOME/biser/flakes/$name' && echo '$$XDG_STATE_HOME/biser/flakes/$name'",
-                          delete = s"rm -rf '$$XDG_STATE_HOME/biser/flakes/$name'"
-                        )
-                      )
-                      .stdout
+        config <- jsonConfig
 
         _ <- command.local
                .Command(
                  s"$name-deploy",
                  command.local.CommandArgs(
                    create =
-                     p"""git clone --depth=1 ${params.flakeRepository} . && echo '$jsonConfig' > '${params.configLocation}' && nixos-rebuild switch < /dev/null --use-remote-sudo --target-host ${params.targetHost} --show-trace --flake ".#${params.flakeOutput}"""",
-                   dir = flakeDir,
+                     p"""f=$$(mktemp); echo '$config' > $$f ; nixos-rebuild switch < /dev/null --use-remote-sudo --target-host ${params.targetHost} --show-trace --flake "${params.flake}";rm-rf $$f""",
                    environment = Map(
                      "NIX_SSHOPTS" -> "-t -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
                    )
@@ -61,7 +51,7 @@ object ConfigurableFlakeDeployment:
                )
                .stdout
 
-      } yield flakeDir
+      } yield config
 
-      ConfigurableFlakeDeployment(deployment)
+      PurgaDeployment(deployment)
     }
