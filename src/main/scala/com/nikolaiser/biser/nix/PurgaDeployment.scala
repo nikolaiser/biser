@@ -10,8 +10,7 @@ import Pulumi.given_ExecutionContext
 case class PurgaDeployment private (
     config: Output[String]
 )(using ComponentBase)
-    extends ComponentResource
-    derives RegistersOutputs
+    extends ComponentResource derives RegistersOutputs
 
 object PurgaDeployment:
 

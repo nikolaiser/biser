@@ -8,8 +8,7 @@ import com.nikolaiser.biser.nix.FlakeBuild
 case class NixOsCloudInit private (
     file: Output[proxmoxve.storage.File]
 )(using ComponentBase)
-    extends ComponentResource
-    derives RegistersOutputs
+    extends ComponentResource derives RegistersOutputs
 
 object NixOsCloudInit:
 

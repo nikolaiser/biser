@@ -7,8 +7,7 @@ import besom.internal.RegistersOutputs
 case class FlakeBuild private (
     path: Output[String]
 )(using ComponentBase)
-    extends ComponentResource
-    derives RegistersOutputs
+    extends ComponentResource derives RegistersOutputs
 
 object FlakeBuild:
 
