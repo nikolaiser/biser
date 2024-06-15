@@ -7,8 +7,7 @@ import besom.internal.RegistersOutputs
 case class CloudInitVm private (
     vm: Output[proxmoxve.vm.VirtualMachine]
 )(using ComponentBase)
-    extends ComponentResource
-    derives RegistersOutputs
+    extends ComponentResource derives RegistersOutputs
 
 object CloudInitVm:
 
