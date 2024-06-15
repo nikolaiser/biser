@@ -28,6 +28,7 @@ autolabeler:
       - '/chore-.+/'
       - '/docs-.+/'
       - '/scala-steward.+/'
+      - '/update.+/'
       - '/dependabot.+/'
   - label: 'fix'
     branch:
