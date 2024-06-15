@@ -1,56 +1,35 @@
 package com.nikolaiser.biser.nix
 
 import besom.*
-import besom.api.command
-import besom.internal.RegistersOutputs
+import besom.api.command.local.Command
+import besom.api.command.local.CommandArgs
 import besom.json.JsonWriter
-import scala.concurrent.Future
-import Pulumi.given_ExecutionContext
+import besom.internal.Result
+import besom.json.JsString
 
-case class PurgaDeployment private (
-    config: Output[String]
-)(using ComponentBase)
-    extends ComponentResource derives RegistersOutputs
+def purgaDeployment[A](username: String, host: String, flake: String, config: A)(using writer: JsonWriter[A], ctx: Context) =
+  val jsonConfig       = writer.write(config)
+  val deployCmd        =
+    s"""f=$$(mktemp); echo '${jsonConfig.toString}' > $$f ; nixos-rebuild switch < /dev/null --use-remote-sudo --target-host $username@$host --show-trace --flake "$flake" --override-input purgaArgs file+file://$$f --no-write-lock-file --refresh;rm -rf $$f"""
+  val checkRevisionCmd = s"nix flake metadata ${flake.split("#").head} --no-write-lock-file --json --refresh | jq '.revision'"
 
-object PurgaDeployment:
-
-  case class Params[A](
-      flake: Input[String],
-      flakeInput: Input[String] = "purgaArgs",
-      config: Input[A],
-      targetHost: Input[String] // including usrname@
+  Command(
+    s"$host-$flake-deploy",
+    CommandArgs(
+      create = deployCmd,
+      update = deployCmd,
+      environment = Map(
+        "NIX_SSHOPTS" -> "-t -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+      ),
+      triggers = List(
+        jsonConfig,
+        besom.internal.Output
+          .apply(
+            Result.blocking(
+              os.proc("/bin/sh", "-c", checkRevisionCmd).spawn().stdout.trim()
+            )
+          )
+          .map(JsString(_))
+      )
+    )
   )
-
-  def apply[A: JsonWriter](using Context)(
-      name: NonEmptyString,
-      params: Params[A],
-      options: ComponentResourceOptions = ComponentResourceOptions()
-  ): Output[PurgaDeployment] =
-    component(
-      name,
-      "biser:nix:PurgaDeployment",
-      options
-    ) {
-      val jsonConfig = params.config.asOutput().map { conf => summon[JsonWriter[A]].write(conf).toString }
-
-      val deployment = for {
-
-        config <- jsonConfig
-
-        _ <- command.local
-               .Command(
-                 s"$name-deploy",
-                 command.local.CommandArgs(
-                   create =
-                     p"""f=$$(mktemp); echo '$config' > $$f ; nixos-rebuild switch < /dev/null --use-remote-sudo --target-host ${params.targetHost} --show-trace --flake "${params.flake}";rm-rf $$f""",
-                   environment = Map(
-                     "NIX_SSHOPTS" -> "-t -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-                   )
-                 )
-               )
-               .stdout
-
-      } yield config
-
-      PurgaDeployment(deployment)
-    }
