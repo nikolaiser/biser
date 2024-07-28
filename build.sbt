@@ -4,7 +4,7 @@ val BesomCommandVersion   = "0.10.0-core.0.3"
 val BesomProxmoxveVersion = "6.3.1-core.0.3"
 val BesomVersion          = "0.3.2"
 val IzumiVersion          = "1.2.10"
-val OsLibVersion          = "0.10.2"
+val OsLibVersion          = "0.10.3"
 val ZioInteropCatsVersion = "23.1.0.2"
 val ZioVersion            = "2.1.6"
 
