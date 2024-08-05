@@ -7,7 +7,7 @@ val BesomVersion          = "0.3.2"
 val IzumiVersion          = "1.2.11"
 val OsLibVersion          = "0.10.3"
 val ZioInteropCatsVersion = "23.1.0.2"
-val ZioVersion            = "2.1.6"
+val ZioVersion            = "2.1.7"
 
 inThisBuild(
   List(
