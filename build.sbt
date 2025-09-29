@@ -1,6 +1,6 @@
 val scala3Version = "3.4.2"
 
-val BesomCommandVersion   = "0.10.0-core.0.3"
+val BesomCommandVersion   = "0.10.0-core.0.5"
 val BesomProxmoxveVersion = "6.3.1-core.0.3"
 val BesomVersion          = "0.3.2"
 
